@@ -19,11 +19,20 @@
 			"src/background.js"
 		]
 	},
+	"content_scripts": [
+		{
+			"matches": ["<all_urls>"],
+			"run_at": "document_end",
+			"js": ["src/jquery-2.2.4.min.js", "src/eyes.js"],
+			"css": ["styles/eyes.css"]
+		}
+	],
 	"browser_action": {
 		"name": "Click to Googlify",
 		"default_icon": "icons/icon48.png"
 	},
 	"permissions": [
-		"<all_urls>"
+		"<all_urls>",
+		"tabs"
 	]
 }

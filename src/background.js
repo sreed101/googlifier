@@ -13,7 +13,7 @@ function detectAndRescale(canvas, detector, ROI) {
 }
 
 /** Draw googly eye within given rectangle and context. */
-function drawEye(context, rect) {
+function drawEye(context, rect, offset, parentXpath) {
 	var eye = {
 			x: rect[0] + (rect[2] * 0.5),
 			y: rect[1] + (rect[3] * 0.5),
@@ -33,8 +33,10 @@ function drawEye(context, rect) {
 	pupil.x = pupil.x + (Math.random() - 0.5) * randomDistance;
 	pupil.y = pupil.y + (Math.random() - 0.5) * randomDistance;
 
+	// console.log(context, rect);
+
 	// Draw the eye
-	context.beginPath();
+	/*context.beginPath();
 	context.arc(eye.x, eye.y, eye.radius, eye.startAngle, eye.endAngle);
 	context.fillStyle = '#fff';
 	context.fill();
@@ -48,7 +50,11 @@ function drawEye(context, rect) {
 	context.arc(pupil.x, pupil.y, pupil.radius, pupil.startAngle, pupil.endAngle);
 	context.fillStyle = '#000';
 	context.closePath();
-	context.fill();
+	context.fill();*/
+
+	chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+		chrome.tabs.sendMessage(tabs[0].id, { offset: offset, parentXpath: parentXpath, rect: rect, eye: eye, pupil: pupil }, () => {});
+	});
 }
 
 /** Reusable eye detector of fixed 50x50 px resolution */
@@ -66,7 +72,7 @@ chrome.runtime.onMessage.addListener(
 		if (request.type === 'googlify') {
 			var img = new Image();
 			
-			img.onload = function (event) {
+			img.onload = (event) => {
 				var canvas = document.createElement('canvas'),
 					context = canvas.getContext('2d');
 
@@ -85,7 +91,7 @@ chrome.runtime.onMessage.addListener(
 				// Detect and draw eyes within ROIs (regions of interest) in detected faces
 				for (var i = 0; i < faces.length; ++i) {
 					var face = faces[i];
-					
+	
 					// Skip if face detector confidence is too low here
 					if (face[4] < 2) continue;
 					
@@ -94,12 +100,12 @@ chrome.runtime.onMessage.addListener(
 						leftEye  = detectAndRescale(canvas, eyeDetector, leftEyeROI )[0],
 						rightEye = detectAndRescale(canvas, eyeDetector, rightEyeROI)[0];
 					
-					if (leftEye)  drawEye(context, leftEye);
-					if (rightEye) drawEye(context, rightEye);
+					if (leftEye)  drawEye(context, leftEye, request.offset, request.parentXpath);
+					if (rightEye) drawEye(context, rightEye, request.offset, request.parentXpath);
 					
 					// If only one eye is found, fill remaining ROI with googly eye
-					if (leftEye  && !rightEye) drawEye(context, rightEyeROI);
-					if (rightEye && !leftEye)  drawEye(context, leftEyeROI);
+					if (leftEye  && !rightEye) drawEye(context, rightEyeROI, request.offset, request.parentXpath);
+					if (rightEye && !leftEye)  drawEye(context, leftEyeROI, request.offset, request.parentXpath);
 				}
 				
 				sendResponse({
