@@ -13,8 +13,8 @@ chrome.runtime.onMessage.addListener(
         div.style.height = (request.eye.radius * 2) + "px";
         div.style.borderRadius = "50%";
         div.style.background = "#FFFFFF";
-        div.style.top = request.offset.top + (request.rect[1] - request.eye.radius) + "px";
-        div.style.left = request.offset.left + (request.rect[0] - request.eye.radius) + "px";
+        div.style.top = request.offset.top + (request.rect[1]) + "px";
+        div.style.left = request.offset.left + (request.rect[0]) + "px";
         //div.style.top = request.offset.top + (request.eye.y - (request.eye.radius * 2)) + "px";
         //div.style.left = request.offset.left + (request.eye.x - (request.eye.radius * 2)) + "px";
         div.style.position = "absolute";
